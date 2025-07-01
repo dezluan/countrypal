@@ -27,6 +27,7 @@ struct MapAndListView: View {
                     familyFriendlySelected: $familyFriendlySelected
                 )
                 .padding(.vertical, 12)
+                .background(Color.countryBackground)
                 
                 // Ads section
                 AdBannerView()
@@ -73,13 +74,13 @@ struct MapAndListView: View {
             .navigationTitle("CountryPal")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(Color.countryBackground, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: FilterView(eventDataService: eventDataService)) {
                         Image(systemName: "slider.horizontal.3")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(.countryOrange)
                     }
                 }
                 
@@ -89,7 +90,7 @@ struct MapAndListView: View {
                     }) {
                         Image(systemName: locationService.locationPermission == .authorizedWhenInUse || locationService.locationPermission == .authorizedAlways ? "location.fill" : "location")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(locationService.locationPermission == .authorizedWhenInUse || locationService.locationPermission == .authorizedAlways ? .accentColor : .secondary)
+                            .foregroundColor(locationService.locationPermission == .authorizedWhenInUse || locationService.locationPermission == .authorizedAlways ? .countryOrange : .countryTextSecondary)
                     }
                 }
             }
@@ -144,38 +145,47 @@ struct MapAndListView: View {
 struct AdBannerView: View {
     var body: some View {
         HStack {
-            Image(systemName: "megaphone.fill")
+            Image(systemName: "heart.fill")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.accentColor)
+                .foregroundColor(.countryOrange)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Featured Partner")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
+                Text("Community Partners")
+                    .font(.countryPalSmall)
+                    .foregroundColor(.countryTextSecondary)
                 
-                Text("Advertise with us - Reach local event-goers!")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                Text("Support local businesses in your area")
+                    .font(.countryPalCaption)
+                    .foregroundColor(.countryTextPrimary)
             }
             
             Spacer()
             
-            Button("Learn More") {
+            Button("Explore") {
                 // Handle ad tap
             }
-            .font(.caption)
-            .fontWeight(.semibold)
-            .foregroundColor(.accentColor)
+            .countryButtonStyle(isPrimary: false, size: .small)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.countryCream, Color.countryLightOrange.opacity(0.3)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.countryOrange.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(
+                    color: Color.countryOrange.opacity(0.1),
+                    radius: 4,
+                    x: 0,
+                    y: 2
                 )
         )
     }

@@ -54,16 +54,26 @@ struct QuickFilterButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.countryPalSmall)
                 Text(title)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.countryPalSmall)
             }
-            .foregroundColor(isSelected ? .white : .primary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .foregroundColor(isSelected ? .white : .countryGreen)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(isSelected ? Color.accentColor : Color(.systemGray6))
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(isSelected ? Color.countryGreen : Color.countryCream)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 25)
+                            .stroke(Color.countryGreen.opacity(0.3), lineWidth: isSelected ? 0 : 2)
+                    )
+                    .shadow(
+                        color: Color.countryGreen.opacity(isSelected ? 0.3 : 0.15),
+                        radius: isSelected ? 6 : 4,
+                        x: 0,
+                        y: isSelected ? 3 : 2
+                    )
             )
         }
         .buttonStyle(PlainButtonStyle())

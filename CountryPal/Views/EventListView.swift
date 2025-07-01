@@ -54,91 +54,65 @@ struct EventCardView: View {
                     // Category badge
                     HStack(spacing: 6) {
                         Image(systemName: event.category.systemImage)
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.countryPalSmall)
                         Text(event.category.rawValue)
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.countryPalSmall)
                     }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [event.category.color, event.category.color.opacity(0.8)]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
+                    .countryTag(color: event.category.countryColor)
                     
                     Spacer()
                     
                     if event.isSponsored {
                         Text("Sponsored")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.1))
-                            .clipShape(Capsule())
+                            .countryTag(color: .countryGold)
                     }
                 }
                 
                 // Event title
                 Text(event.title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.countryPalHeadline)
+                    .foregroundColor(.countryTextPrimary)
                     .multilineTextAlignment(.leading)
                 
                 // Date and time
                 HStack(spacing: 6) {
                     Image(systemName: "calendar")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.accentColor)
+                        .font(.countryPalCaption)
+                        .foregroundColor(.countryOrange)
                     Text(event.durationText)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .font(.countryPalCaption)
+                        .foregroundColor(.countryTextSecondary)
                 }
                 
                 // Location
                 HStack(spacing: 6) {
                     Image(systemName: "location.fill")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.accentColor)
+                        .font(.countryPalCaption)
+                        .foregroundColor(.countryOrange)
                     
                     Text(event.location.venue)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .font(.countryPalCaption)
+                        .foregroundColor(.countryTextSecondary)
                     
                     if let distance = distanceText {
                         Text("•")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .font(.countryPalCaption)
+                            .foregroundColor(.countryTextSecondary)
                         
                         Text(distance)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.accentColor)
+                            .font(.countryPalCaption)
+                            .foregroundColor(.countryGreen)
                     }
                 }
                 
                 // Description preview
                 Text(event.description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.countryPalBody)
+                    .foregroundColor(.countryTextSecondary)
                     .lineLimit(2)
             }
             .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.primary.opacity(0.08), lineWidth: 1)
-                    )
-            )
-            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
-            .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 2)
+            .countryCard(elevation: 1.2)
         }
         .buttonStyle(PlainButtonStyle())
     }
