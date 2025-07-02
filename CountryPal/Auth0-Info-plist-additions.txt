@@ -1,0 +1,85 @@
+📋 Auth0 Info.plist Configuration
+
+Add these entries to your Info.plist file in Xcode:
+
+1. Open your project in Xcode
+2. Select your target (CountryPal)
+3. Go to the Info tab
+4. Add these keys by clicking the + button:
+
+==========================================
+
+Key: CFBundleURLTypes
+Type: Array
+    Item 0 (Dictionary):
+        Key: CFBundleURLName
+        Type: String
+        Value: auth0
+        
+        Key: CFBundleURLSchemes
+        Type: Array
+            Item 0 (String): com.countrypal
+
+==========================================
+
+Key: NSAppTransportSecurity
+Type: Dictionary
+    Key: NSAllowsArbitraryLoads
+    Type: Boolean
+    Value: YES
+    
+    (Note: In production, configure specific domains instead of allowing arbitrary loads)
+
+==========================================
+
+Key: LSApplicationQueriesSchemes
+Type: Array
+    Item 0 (String): https
+    Item 1 (String): googlechrome
+    Item 2 (String): googleauth
+    Item 3 (String): com.googleusercontent.apps
+
+==========================================
+
+Optional (if you plan to use profile photos):
+
+Key: NSCameraUsageDescription
+Type: String
+Value: CountryPal would like to access your camera to update your profile photo.
+
+Key: NSPhotoLibraryUsageDescription
+Type: String
+Value: CountryPal would like to access your photo library to update your profile photo.
+
+==========================================
+
+🔧 Additional Xcode Configuration:
+
+1. Target Settings > Signing & Capabilities:
+   - Ensure your Team is selected
+   - Bundle Identifier should match what you use in Auth0 (e.g., com.countrypal)
+
+2. Build Settings:
+   - Search for "URL Schemes"
+   - Verify com.countrypal is listed
+
+==========================================
+
+🌐 Auth0 Dashboard Configuration:
+
+In your Auth0 Application settings, add these EXACT URLs:
+
+Allowed Callback URLs:
+com.countrypal://dev-mwjy0e12niaz6e0k.uk.auth0.com/ios/com.countrypal/callback
+
+Allowed Logout URLs:
+com.countrypal://dev-mwjy0e12niaz6e0k.uk.auth0.com/ios/com.countrypal/callback
+
+✅ Your credentials are already configured in Auth0Configuration.swift
+
+==========================================
+
+After completing these steps:
+1. Update Auth0Configuration.swift with your actual domain and client ID
+2. Build and run your app
+3. Test the authentication flow

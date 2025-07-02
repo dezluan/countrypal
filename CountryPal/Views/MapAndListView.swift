@@ -8,6 +8,12 @@
 import SwiftUI
 import MapKit
 
+enum ViewDisplayMode {
+    case split
+    case mapMaximized
+    case listMaximized
+}
+
 struct MapAndListView: View {
     @ObservedObject var eventDataService: EventDataService
     @ObservedObject var locationService: LocationService
@@ -16,6 +22,7 @@ struct MapAndListView: View {
     @State private var thisWeekendSelected = false
     @State private var nearMeSelected = false
     @State private var familyFriendlySelected = false
+    @State private var viewMode: ViewDisplayMode = .split
     
     var body: some View {
         NavigationStack {
@@ -34,40 +41,86 @@ struct MapAndListView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
                 
-                // Split view: Map on top, List on bottom
+                // Dynamic view based on mode
                 GeometryReader { geometry in
-                    VStack(spacing: 0) {
-                        // Map view (top half)
-                        MapView(
+                    switch viewMode {
+                    case .split:
+                        VStack(spacing: 0) {
+                            // Map view (top half)
+                            MapViewWithControls(
+                                events: filteredEvents,
+                                region: $locationService.region,
+                                userLocation: locationService.userLocation,
+                                onEventSelected: { event in
+                                    selectedEvent = event
+                                    showingEventDetail = true
+                                },
+                                onMaximize: {
+                                    withAnimation(.easeInOut(duration: 0.4)) {
+                                        viewMode = .mapMaximized
+                                    }
+                                }
+                            )
+                            .frame(height: geometry.size.height * 0.5)
+                            
+                            // Divider
+                            Rectangle()
+                                .fill(Color.countryTextSecondary.opacity(0.3))
+                                .frame(height: 1)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                            
+                            // List view (bottom half)
+                            ListViewWithControls(
+                                events: filteredEvents,
+                                userLocation: locationService.userLocation,
+                                onEventSelected: { event in
+                                    selectedEvent = event
+                                    showingEventDetail = true
+                                },
+                                onMaximize: {
+                                    withAnimation(.easeInOut(duration: 0.4)) {
+                                        viewMode = .listMaximized
+                                    }
+                                }
+                            )
+                            .frame(height: geometry.size.height * 0.5)
+                        }
+                        
+                    case .mapMaximized:
+                        MapViewWithControls(
                             events: filteredEvents,
                             region: $locationService.region,
                             userLocation: locationService.userLocation,
                             onEventSelected: { event in
                                 selectedEvent = event
                                 showingEventDetail = true
-                            }
+                            },
+                            onMaximize: {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    viewMode = .split
+                                }
+                            },
+                            isMaximized: true
                         )
-                        .frame(height: geometry.size.height * 0.5)
-                        .cornerRadius(12)
-                        .padding(.horizontal, 20)
+                        .frame(height: geometry.size.height)
                         
-                        // Divider
-                        Rectangle()
-                            .fill(Color(.systemGray5))
-                            .frame(height: 1)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                        
-                        // List view (bottom half)
-                        EventListView(
+                    case .listMaximized:
+                        ListViewWithControls(
                             events: filteredEvents,
                             userLocation: locationService.userLocation,
                             onEventSelected: { event in
                                 selectedEvent = event
                                 showingEventDetail = true
-                            }
+                            },
+                            onMaximize: {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    viewMode = .split
+                                }
+                            },
+                            isMaximized: true
                         )
-                        .frame(height: geometry.size.height * 0.5)
+                        .frame(height: geometry.size.height)
                     }
                 }
             }
@@ -86,7 +139,11 @@ struct MapAndListView: View {
                 
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        locationService.requestLocationPermission()
+                        if locationService.locationPermission == .authorizedWhenInUse || locationService.locationPermission == .authorizedAlways {
+                            locationService.centerMapOnUserLocation()
+                        } else {
+                            locationService.requestLocationPermission()
+                        }
                     }) {
                         Image(systemName: locationService.locationPermission == .authorizedWhenInUse || locationService.locationPermission == .authorizedAlways ? "location.fill" : "location")
                             .font(.system(size: 18, weight: .medium))
@@ -188,6 +245,86 @@ struct AdBannerView: View {
                     y: 2
                 )
         )
+    }
+}
+
+struct MapViewWithControls: View {
+    let events: [Event]
+    @Binding var region: MKCoordinateRegion
+    let userLocation: CLLocationCoordinate2D?
+    let onEventSelected: (Event) -> Void
+    let onMaximize: () -> Void
+    var isMaximized: Bool = false
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            MapView(
+                events: events,
+                region: $region,
+                userLocation: userLocation,
+                onEventSelected: onEventSelected
+            )
+            .cornerRadius(isMaximized ? 0 : 12)
+            .padding(.horizontal, isMaximized ? 0 : 20)
+            
+            // Maximize/Minimize button
+            Button(action: onMaximize) {
+                Image(systemName: isMaximized ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(Color.countryGreen.opacity(0.9))
+                            .shadow(
+                                color: Color.countryGreen.opacity(0.3),
+                                radius: 4,
+                                x: 0,
+                                y: 2
+                            )
+                    )
+            }
+            .padding(.top, 12)
+            .padding(.trailing, isMaximized ? 20 : 32)
+        }
+    }
+}
+
+struct ListViewWithControls: View {
+    let events: [Event]
+    let userLocation: CLLocationCoordinate2D?
+    let onEventSelected: (Event) -> Void
+    let onMaximize: () -> Void
+    var isMaximized: Bool = false
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            EventListView(
+                events: events,
+                userLocation: userLocation,
+                onEventSelected: onEventSelected
+            )
+            
+            // Maximize/Minimize button
+            Button(action: onMaximize) {
+                Image(systemName: isMaximized ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(Color.countryOrange.opacity(0.9))
+                            .shadow(
+                                color: Color.countryOrange.opacity(0.3),
+                                radius: 4,
+                                x: 0,
+                                y: 2
+                            )
+                    )
+            }
+            .padding(.top, 12)
+            .padding(.trailing, 20)
+        }
     }
 }
 

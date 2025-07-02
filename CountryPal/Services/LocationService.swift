@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import MapKit
+import SwiftUI
 
 class LocationService: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
@@ -34,10 +35,15 @@ class LocationService: NSObject, ObservableObject {
             locationManager.requestWhenInUseAuthorization()
         case .denied, .restricted:
             // Handle case where user needs to go to settings
+            print("Location access denied. User needs to enable in Settings.")
             break
         case .authorizedWhenInUse, .authorizedAlways:
             startLocationUpdates()
         @unknown default:
+            // This handles the "When I Share" case and other unknown states
+            print("Location permission: \(locationPermission.rawValue)")
+            // Try to request location anyway for "When I Share" mode
+            locationManager.requestLocation()
             break
         }
     }
@@ -79,6 +85,29 @@ class LocationService: NSObject, ObservableObject {
         
         return userCLLocation.distance(from: eventLocation) / 1000 // Return distance in kilometers
     }
+    
+    func centerMapOnUserLocation() {
+        guard let userLocation = userLocation else {
+            // If no user location, try to get current location
+            switch locationPermission {
+            case .notDetermined:
+                requestLocationPermission()
+            case .authorizedWhenInUse, .authorizedAlways:
+                startLocationUpdates()
+            default:
+                // For "When I Share" and other states, try to request one-time location
+                locationManager.requestLocation()
+            }
+            return
+        }
+        
+        withAnimation(.easeInOut(duration: 1.0)) {
+            region = MKCoordinateRegion(
+                center: userLocation,
+                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) // Closer zoom when manually centering
+            )
+        }
+    }
 }
 
 extension LocationService: CLLocationManagerDelegate {
@@ -86,8 +115,13 @@ extension LocationService: CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         
         DispatchQueue.main.async {
+            let isFirstLocationUpdate = self.userLocation == nil
             self.userLocation = location.coordinate
-            self.updateRegionForUserLocation()
+            
+            // Auto-center on first location update
+            if isFirstLocationUpdate {
+                self.centerMapOnUserLocation()
+            }
         }
     }
     
@@ -109,6 +143,10 @@ extension LocationService: CLLocationManagerDelegate {
             case .notDetermined:
                 break
             @unknown default:
+                // Handle "When I Share" and other new permission states
+                print("Location authorization status: \(status.rawValue)")
+                // Don't automatically start continuous updates for "When I Share"
+                // User will need to tap location button to request one-time location
                 break
             }
         }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- URL Schemes for Auth0 -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>auth0</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.countrypal</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- App Transport Security for Auth0 -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	
+	<!-- Queries for external apps -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>googlechrome</string>
+		<string>googleauth</string>
+		<string>com.googleusercontent.apps</string>
+	</array>
+	
+	<!-- Location Usage Description (already configured) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CountryPal needs your location to show nearby community events and help you discover local activities.</string>
+	
+	<!-- Optional: Camera and Photo Library for profile photos -->
+	<key>NSCameraUsageDescription</key>
+	<string>CountryPal would like to access your camera to update your profile photo.</string>
+	
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CountryPal would like to access your photo library to update your profile photo.</string>
+</dict>
+</plist>
